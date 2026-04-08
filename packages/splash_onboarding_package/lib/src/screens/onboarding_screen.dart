@@ -1,0 +1,143 @@
+import 'package:flutter/material.dart';
+import 'package:liquid_theme_package/liquid_theme_package.dart';
+
+import '../models/onboarding_page_data.dart';
+
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({
+    required this.pages,
+    required this.onDone,
+    super.key,
+    this.onSkip,
+    this.doneLabel = 'Get Started',
+    this.nextLabel = 'Next',
+    this.skipLabel = 'Skip',
+  });
+
+  final List<OnboardingPageData> pages;
+  final VoidCallback onDone;
+  final VoidCallback? onSkip;
+  final String doneLabel;
+  final String nextLabel;
+  final String skipLabel;
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  late final PageController _pageController;
+  int _index = 0;
+
+  bool get _isLastPage => _index == widget.pages.length - 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _next() {
+    if (_isLastPage) {
+      widget.onDone();
+      return;
+    }
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(widget.pages.isNotEmpty, 'Onboarding pages cannot be empty.');
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Expanded(
+                child: GlassCard(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: widget.pages.length,
+                    onPageChanged: (value) => setState(() => _index = value),
+                    itemBuilder: (context, pageIndex) {
+                      final page = widget.pages[pageIndex];
+                      return Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(page.icon, size: 64),
+                            const SizedBox(height: 20),
+                            Text(
+                              page.title,
+                              style: Theme.of(context).textTheme.headlineSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              page.description,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(widget.pages.length, (dotIndex) {
+                  final isActive = dotIndex == _index;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: isActive ? 20 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: GlassButton.custom(
+                      onTap: widget.onSkip ?? widget.onDone,
+                      child: Text(widget.skipLabel),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GlassButton.custom(
+                      onTap: _next,
+                      child: Text(_isLastPage ? widget.doneLabel : widget.nextLabel),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

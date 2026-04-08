@@ -137,7 +137,6 @@ GlassBottomBar(
 
 ## 6) Yapilmamasi Gerekenler
 
-- `LiquidThemeExtension`, `LiquidCard`, `LiquidButton`, `LiquidTabBar` gibi artik olmayan API'leri kullanma
 - Uygulama genel `ThemeData` akislarini gereksiz bypass etme
 - Tum ekrani sebepsiz `useOwnLayer: true` ile doldurma (performans riski)
 
