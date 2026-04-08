@@ -57,101 +57,111 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     assert(widget.pages.isNotEmpty, 'Onboarding pages cannot be empty.');
+    final scheme = Theme.of(context).colorScheme;
+    final buttonShape = const LiquidRoundedSuperellipse(borderRadius: 14);
+    final buttonSettings = LiquidGlassSettings(
+      visibility: 1,
+      glassColor: scheme.surface.withValues(alpha: 0.35),
+      blur: 8,
+      thickness: 26,
+      lightIntensity: 0.7,
+    );
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: widget.pages.length,
-                  onPageChanged: (value) => setState(() => _index = value),
-                  itemBuilder: (context, pageIndex) {
-                    final page = widget.pages[pageIndex];
-                    if (page.child != null) {
-                      return SizedBox.expand(child: page.child!);
-                    }
-                    return GlassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(page.icon, size: 64),
-                            const SizedBox(height: 20),
-                            Text(
-                              page.title,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              page.description,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.pages.length,
+              onPageChanged: (value) => setState(() => _index = value),
+              itemBuilder: (context, pageIndex) {
+                final page = widget.pages[pageIndex];
+                if (page.child != null) {
+                  return SizedBox.expand(child: page.child!);
+                }
+                return GlassCard(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(widget.pages.length, (dotIndex) {
-                        final isActive = dotIndex == _index;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: isActive ? 20 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
                       children: [
-                        Expanded(
-                          child: GlassButton.custom(
-                            onTap: widget.onSkip ?? widget.onDone,
-                            child: Text(widget.skipLabel),
-                          ),
+                        Icon(page.icon, size: 64),
+                        const SizedBox(height: 20),
+                        Text(
+                          page.title,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: GlassButton.custom(
-                            onTap: _next,
-                            child: Text(_isLastPage ? widget.doneLabel : widget.nextLabel),
-                          ),
+                        const SizedBox(height: 10),
+                        Text(
+                          page.description,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              minimum: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(widget.pages.length, (dotIndex) {
+                      final isActive = dotIndex == _index;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: isActive ? 20 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GlassButton.custom(
+                          onTap: widget.onSkip ?? widget.onDone,
+                          shape: buttonShape,
+                          settings: buttonSettings,
+                          style: GlassButtonStyle.filled,
+                          child: Text(widget.skipLabel),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GlassButton.custom(
+                          onTap: _next,
+                          shape: buttonShape,
+                          settings: buttonSettings,
+                          style: GlassButtonStyle.filled,
+                          child: Text(_isLastPage ? widget.doneLabel : widget.nextLabel),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
