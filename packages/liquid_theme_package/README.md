@@ -1,11 +1,8 @@
-`liquid_theme_package`, `liquid_glass_widgets` tabanlı yeniden kullanılabilir bir liquid glass tema katmanıdır.
+`liquid_theme_package`, `liquid_glass_widgets` paketini tek import ile kullanmanizi saglayan bir facade pakettir.
 
 Paket:
-- `ThemeExtension` ile uygulama temasına entegre olur
-- Parametrik görsel ayarlar sunar (renk, blur, opacity, border, refractive index)
-- Hazır sarmalayıcı bileşenler sağlar: `LiquidCard`, `LiquidButton`
-- Daha otomatik kullanım için ek wrapper'lar: `LiquidScaffold`, `LiquidTabBar`, `LiquidBottomBar`
-- Hazır presetler içerir: `light`, `dark`, `highContrast`, `fromSeed`
+- `liquid_glass_widgets` API'sini oldugu gibi disari aktarir
+- Tuketici projede tek import ile kullanim saglar
 
 ## Kurulum
 
@@ -29,12 +26,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lightTheme = ThemeData.light().withLiquidTheme(LiquidThemePresets.light);
-    final darkTheme = ThemeData.dark().withLiquidTheme(LiquidThemePresets.dark);
-
     return MaterialApp(
-      theme: lightTheme,
-      darkTheme: darkTheme,
       home: const HomePage(),
     );
   }
@@ -47,13 +39,13 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: LiquidCard(
+        child: GlassCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('Liquid Card'),
               const SizedBox(height: 12),
-              LiquidButton(
+              GlassButton(
                 onTap: () {},
                 child: const Text('Devam Et'),
               ),
@@ -66,55 +58,5 @@ class HomePage extends StatelessWidget {
 }
 ```
 
-## Preset ve Parametrik Kullanım
-
-Seed renkten tema üretimi:
-
-```dart
-final seeded = LiquidThemePresets.fromSeed(
-  const Color(0xFF6750A4),
-  brightness: Brightness.dark,
-);
-
-final theme = ThemeData.dark().withLiquidTheme(seeded);
-```
-
-Yerel override:
-
-```dart
-LiquidCard(
-  themeOverride: LiquidThemeExtension.resolve(context).copyWith(
-    radius: 24,
-    blur: 8,
-    borderWidth: 1.5,
-  ),
-  child: const Text('Custom glass'),
-)
-```
-
-## Otomatik Entegrasyon Wrapper'ları
-
-```dart
-LiquidScaffold(
-  body: const HomePageBody(),
-  bottomNavigationBar: LiquidBottomBar(
-    selectedIndex: currentIndex,
-    onTabSelected: (i) => setState(() => currentIndex = i),
-    tabs: const [
-      LiquidBottomTab(label: 'Home', icon: Icon(Icons.home_outlined)),
-      LiquidBottomTab(label: 'Search', icon: Icon(Icons.search)),
-    ],
-  ),
-)
-```
-
-```dart
-LiquidTabBar(
-  selectedIndex: tabIndex,
-  onTabSelected: (i) => setState(() => tabIndex = i),
-  tabs: const [
-    LiquidTab(label: 'Overview'),
-    LiquidTab(label: 'Stats'),
-  ],
-)
-```
+Detayli kullanim icin:
+- https://github.com/sdegenaar/liquid_glass_widgets
