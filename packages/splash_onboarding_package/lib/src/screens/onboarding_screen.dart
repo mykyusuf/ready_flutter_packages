@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_theme_package/liquid_theme_package.dart';
 
 import '../models/onboarding_page_data.dart';
@@ -43,6 +44,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  void _triggerHaptic(Future<void> Function() action) {
+    action().catchError((_) {
+      // Ignore haptic errors on unsupported platforms/test environments.
+    });
+  }
+
+  void _onSkipTap() {
+    _triggerHaptic(HapticFeedback.selectionClick);
+    (widget.onSkip ?? widget.onDone).call();
+  }
+
+  void _onNextTap() {
+    if (_isLastPage) {
+      _triggerHaptic(HapticFeedback.lightImpact);
+      widget.onDone();
+      return;
+    }
+    _triggerHaptic(HapticFeedback.selectionClick);
+    _next();
+  }
+
   void _next() {
     if (_isLastPage) {
       widget.onDone();
@@ -58,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     assert(widget.pages.isNotEmpty, 'Onboarding pages cannot be empty.');
     final scheme = Theme.of(context).colorScheme;
-    final buttonShape = const LiquidRoundedSuperellipse(borderRadius: 14);
+    final buttonShape = const LiquidRoundedSuperellipse(borderRadius: 32);
     final buttonSettings = LiquidGlassSettings(
       visibility: 1,
       glassColor: scheme.surface.withValues(alpha: 0.35),
@@ -138,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       Expanded(
                         child: GlassButton.custom(
-                          onTap: widget.onSkip ?? widget.onDone,
+                          onTap: _onSkipTap,
                           shape: buttonShape,
                           settings: buttonSettings,
                           style: GlassButtonStyle.filled,
@@ -148,7 +170,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: GlassButton.custom(
-                          onTap: _next,
+                          onTap: _onNextTap,
                           shape: buttonShape,
                           settings: buttonSettings,
                           style: GlassButtonStyle.filled,
