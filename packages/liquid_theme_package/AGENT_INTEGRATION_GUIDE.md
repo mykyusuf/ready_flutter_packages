@@ -1,10 +1,10 @@
 # Liquid Theme Package - Agent Integration Guide
 
-Bu doküman, bir kod agent'ının `liquid_theme_package` paketini **yeni bir Flutter projesine** doğru şekilde entegre etmesi için hazırlanmıştır.
+Bu dokuman, `liquid_theme_package` paketini yeni bir Flutter projesine dogru sekilde entegre etmek icin hazirlanmistir.
 
-Amaç: "TabBar'ı liquid yap", "Card'ları liquid yap", "Button'ları liquid yap" gibi görevleri minimum yorumla, standart bir yöntemle uygulamak.
+Onemli not: Bu paket artik bir **facade** pakettir. `liquid_theme_package`, kendi widget/tema katmanini sunmaz; bunun yerine `liquid_glass_widgets` API'sini oldugu gibi re-export eder.
 
-## 1) Hızlı Kurulum
+## 1) Hizli Kurulum
 
 Hedef projede `pubspec.yaml`:
 
@@ -12,102 +12,80 @@ Hedef projede `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  liquid_theme_package: ^0.0.1
+  liquid_theme_package:
+    git:
+      url: https://github.com/mykyusuf/ready_flutter_packages.git
+      ref: main
+      path: packages/liquid_theme_package
 ```
 
-Ardından:
+Ardindan:
 
 ```bash
 flutter pub get
 ```
 
-## 2) Tema Entegrasyonu (Zorunlu)
+## 2) Import Standardi
 
-Agent, ilk iş olarak uygulama temasına `LiquidThemeExtension` eklemelidir.
+Kod tarafinda tek import kullan:
+
+```dart
+import 'package:liquid_theme_package/liquid_theme_package.dart';
+```
+
+Bu import, `liquid_glass_widgets` tiplerine erisim saglar.
+
+## 3) Zorunlu Baslangic (initialize + wrap)
+
+Agent, uygulama girisinde asagidaki akisi kullanmalidir:
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:liquid_theme_package/liquid_theme_package.dart';
 
-MaterialApp(
-  theme: ThemeData.light().withLiquidTheme(LiquidThemePresets.light),
-  darkTheme: ThemeData.dark().withLiquidTheme(LiquidThemePresets.dark),
-  home: const HomePage(),
-)
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LiquidGlassWidgets.initialize();
+  runApp(LiquidGlassWidgets.wrap(const MyApp()));
+}
 ```
 
-### Seed tabanlı tema gerekiyorsa
+Neden:
+- `initialize()` shader/pipeline hazirligini erkene alir
+- `wrap()` glass surface'lerde ortak backdrop capture kullanir (ozellikle Impeller'da daha stabil)
+
+## 4) Agent Karar Kurallari
+
+Agent bu paketi kullanirken su kurallari izlemelidir:
+
+- `Liquid*` wrapper siniflari bekleme; dogrudan `Glass*` bilesenlerini kullan
+- Mevcut event/navigation/state akislarini bozma
+- Gorunum degisikligi yaparken mevcut layout ve erisilebilirlik davranisini koru
+- Hardcoded degerleri minimumda tut; once mevcut Theme/ColorScheme ile uyumlu ol
+
+## 5) Sik Gorevler Icin Tarifler
+
+### 4.1 "Card'lari liquid yap"
 
 ```dart
-final seededLight = LiquidThemePresets.fromSeed(
-  const Color(0xFF6750A4),
-  brightness: Brightness.light,
-);
-
-final seededDark = LiquidThemePresets.fromSeed(
-  const Color(0xFF6750A4),
-  brightness: Brightness.dark,
-);
-```
-
-## 3) Agent Karar Kuralları
-
-Agent bu paketi kullanırken aşağıdaki kuralları izlemelidir:
-
-- Önce global tema: `withLiquidTheme(...)`
-- Sonra ihtiyaç varsa lokal override: `themeOverride: LiquidThemeExtension.resolve(context).copyWith(...)`
-- Bileşen dönüşümünde mevcut işlevselliği bozma (event, navigation, state)
-- Görsel dönüşüm yaparken mevcut padding/margin ve erişilebilirlik davranışını koru
-
-## 4) Sık Görevler İçin Tarifler
-
-## 4.1 "Card'ları liquid yap"
-
-### Dönüşüm kuralı
-
-- `Card`, `Container`, `DecoratedBox` gibi yüzeyleri `LiquidCard` ile sar.
-- İçerik hiyerarşisini değiştirme, sadece yüzeyi liquid hale getir.
-
-### Örnek
-
-```dart
-LiquidCard(
+GlassCard(
   child: Column(
     mainAxisSize: MainAxisSize.min,
     children: const [
-      Text('Başlık'),
+      Text('Baslik'),
       SizedBox(height: 8),
-      Text('İçerik'),
+      Text('Icerik'),
     ],
   ),
 )
 ```
 
-### Lokal override örneği
+### 4.2 "Button'lari liquid yap"
+
+`GlassButton` ikon-temelli kurucudur. Metin/ozel icerik icin `GlassButton.custom` kullan:
 
 ```dart
-LiquidCard(
-  themeOverride: LiquidThemeExtension.resolve(context).copyWith(
-    radius: 24,
-    blur: 7,
-    borderWidth: 1.4,
-  ),
-  child: const Text('Özelleştirilmiş kart'),
-)
-```
-
-## 4.2 "Button'ları liquid yap"
-
-### Dönüşüm kuralı
-
-- `ElevatedButton`, `FilledButton`, `OutlinedButton` yerine (veya etrafına) `LiquidButton` kullan.
-- `onPressed` davranışını `onTap` içine taşı.
-- Metin stilini tema üzerinden al, ekstra zorunlu değilse elle sabitleme yapma.
-
-### Örnek
-
-```dart
-LiquidButton(
+GlassButton.custom(
   onTap: () {
     // mevcut action
   },
@@ -115,14 +93,10 @@ LiquidButton(
 )
 ```
 
-## 4.3 "TabBar'ı liquid yap"
-
-Agent öncelikle hazır `LiquidTabBar` wrapper'ını kullanmalıdır.
-
-### Örnek (önerilen)
+### 4.3 "TabBar'i liquid yap"
 
 ```dart
-LiquidTabBar(
+GlassTabBar(
   selectedIndex: tabIndex,
   onTabSelected: (i) => setState(() => tabIndex = i),
   tabs: const [
@@ -133,57 +107,24 @@ LiquidTabBar(
 )
 ```
 
-### Fallback (mevcut TabController/TabBar yapısını korumak gerekiyorsa)
+Not: Kucuk cihazlarda veya buyuk yazi olceginde tasma olmamasi icin `height` degerini artir:
 
 ```dart
-class LiquidTabBarShell extends StatelessWidget {
-  const LiquidTabBarShell({
-    super.key,
-    required this.controller,
-    required this.tabs,
-  });
-
-  final TabController controller;
-  final List<Widget> tabs;
-
-  @override
-  Widget build(BuildContext context) {
-    final lt = LiquidThemeExtension.resolve(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: LiquidCard(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        themeOverride: lt.copyWith(radius: 20, blur: 6),
-        child: TabBar(
-          controller: controller,
-          tabs: tabs,
-          dividerColor: Colors.transparent,
-          labelColor: lt.palette.accent,
-          unselectedLabelColor: lt.palette.accent.withValues(alpha: 0.65),
-          indicator: BoxDecoration(
-            color: lt.palette.surface.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: lt.palette.border,
-              width: lt.borderWidth,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+GlassTabBar(
+  height: 52,
+  selectedIndex: tabIndex,
+  onTabSelected: (i) => setState(() => tabIndex = i),
+  tabs: const [
+    GlassTab(label: 'Ana Sayfa', icon: Icon(Icons.home_outlined)),
+    GlassTab(label: 'Ara', icon: Icon(Icons.search_outlined)),
+  ],
+)
 ```
 
-Bu sayede "TabBar liquid yap" görevi, bileşeni bozmadan görsel olarak liquid hale gelir.
-
-## 4.4 "BottomNavigationBar'ı liquid yap"
-
-Agent öncelikle hazır `LiquidBottomBar` wrapper'ını kullanmalıdır.
+### 4.4 "BottomNavigationBar'i liquid yap"
 
 ```dart
-LiquidBottomBar(
+GlassBottomBar(
   selectedIndex: currentIndex,
   onTabSelected: (i) => setState(() => currentIndex = i),
   tabs: const [
@@ -194,54 +135,23 @@ LiquidBottomBar(
 )
 ```
 
-## 5) ThemeExtension Erişim Standardı
+## 6) Yapilmamasi Gerekenler
 
-Agent, tema değerini her zaman şu sırayla çözmelidir:
+- `LiquidThemeExtension`, `LiquidCard`, `LiquidButton`, `LiquidTabBar` gibi artik olmayan API'leri kullanma
+- Uygulama genel `ThemeData` akislarini gereksiz bypass etme
+- Tum ekrani sebepsiz `useOwnLayer: true` ile doldurma (performans riski)
 
-1. `themeOverride` verilmişse onu kullan
-2. Yoksa `LiquidThemeExtension.resolve(context)`
-3. Bu da yoksa preset fallback (paket kendi içinde çözer)
+## 7) Agent Calisma Checklist'i
 
-## 6) Yapılmaması Gerekenler
+Her gorev sonunda:
 
-- Uygulama genel `ThemeData` akışını bypass etme
-- Liquid görünüm için sabit, tema dışı hardcoded renkler ekleme
-- Var olan widget davranışını (tap, disabled, semantics) kırma
-- Tüm ekranı gereksiz `useOwnLayer: true` ile doldurma (performans riski)
-
-## 7) Agent Çalışma Checklist'i
-
-Her görev sonunda agent şunları yapmalıdır:
-
-1. Değiştirilen widgetlar derleniyor mu?
+1. Degisen ekranlar derleniyor mu?
 2. `flutter analyze` temiz mi?
-3. `flutter test` (veya ilgili widget testleri) geçiyor mu?
-4. Açık ve koyu modda görünüm kontrol edildi mi?
-5. Tema override verilen yerlerde fallback bozulmadı mı?
+3. `flutter test` (veya ilgili widget testleri) geciyor mu?
+4. Kucuk ekran ve buyuk text scale durumunda tasma var mi?
 
-## 8) Kısa Görev Prompt Şablonları
+## 8) Referans
 
-Bu şablonlar, farklı agent'lara doğrudan verilebilir:
+Detayli API dokumani:
 
-- "Bu projede ana ekran kartlarını `LiquidCard` kullanarak liquid görünüme çevir. Mevcut layout ve spacing bozulmasın."
-- "Settings sayfasındaki aksiyon butonlarını `LiquidButton` ile değiştir. Mevcut `onPressed` davranışlarını koru."
-- "Home ekranındaki `TabBar` yapısını kaldırmadan, `LiquidCard` ile sarıp liquid bir görünüm ver. Seçili/normal renkleri `LiquidThemeExtension` palette'inden al."
-
-## 9) Minimum Entegrasyon Örneği
-
-```dart
-final theme = ThemeData.light().withLiquidTheme(
-  LiquidThemePresets.fromSeed(const Color(0xFF2563EB)),
-);
-```
-
-```dart
-LiquidCard(
-  child: LiquidButton(
-    onTap: () {},
-    child: const Text('Continue'),
-  ),
-)
-```
-
-Bu kadar entegrasyon bile paketi kullanmaya başlamak için yeterlidir.
+- https://github.com/sdegenaar/liquid_glass_widgets

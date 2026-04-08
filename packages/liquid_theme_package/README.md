@@ -17,8 +17,10 @@ dependencies:
 import 'package:flutter/material.dart';
 import 'package:liquid_theme_package/liquid_theme_package.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LiquidGlassWidgets.initialize();
+  runApp(LiquidGlassWidgets.wrap(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -45,7 +47,7 @@ class HomePage extends StatelessWidget {
             children: [
               const Text('Liquid Card'),
               const SizedBox(height: 12),
-              GlassButton(
+              GlassButton.custom(
                 onTap: () {},
                 child: const Text('Devam Et'),
               ),
