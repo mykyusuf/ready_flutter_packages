@@ -1,0 +1,13 @@
+.DS_Store
+.idea/
+.vscode/
+.dart_tool/
+.flutter-plugins-dependencies
+build/
+coverage/
+
+# Flutter package repos should not track lockfiles.
+**/pubspec.lock
+
+# Tooling outputs
+**/doc/api/
