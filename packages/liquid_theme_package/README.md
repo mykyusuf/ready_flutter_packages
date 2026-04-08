@@ -101,8 +101,8 @@ LiquidScaffold(
     selectedIndex: currentIndex,
     onTabSelected: (i) => setState(() => currentIndex = i),
     tabs: const [
-      GlassBottomBarTab(label: 'Home', icon: Icon(Icons.home_outlined)),
-      GlassBottomBarTab(label: 'Search', icon: Icon(Icons.search)),
+      LiquidBottomTab(label: 'Home', icon: Icon(Icons.home_outlined)),
+      LiquidBottomTab(label: 'Search', icon: Icon(Icons.search)),
     ],
   ),
 )
@@ -113,8 +113,8 @@ LiquidTabBar(
   selectedIndex: tabIndex,
   onTabSelected: (i) => setState(() => tabIndex = i),
   tabs: const [
-    GlassTab(label: 'Overview'),
-    GlassTab(label: 'Stats'),
+    LiquidTab(label: 'Overview'),
+    LiquidTab(label: 'Stats'),
   ],
 )
 ```

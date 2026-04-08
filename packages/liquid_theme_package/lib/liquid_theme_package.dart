@@ -1,5 +1,6 @@
 library;
 
+export 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 export 'models/liquid_theme_palette.dart';
 export 'theme/liquid_theme_builder.dart';
 export 'theme/liquid_theme_extension.dart';

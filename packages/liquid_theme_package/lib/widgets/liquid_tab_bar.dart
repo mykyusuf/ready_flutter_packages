@@ -3,6 +3,16 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../theme/liquid_theme_extension.dart';
 
+class LiquidTab {
+  const LiquidTab({
+    required this.label,
+    this.icon,
+  });
+
+  final String label;
+  final Widget? icon;
+}
+
 class LiquidTabBar extends StatelessWidget {
   const LiquidTabBar({
     required this.tabs,
@@ -14,7 +24,7 @@ class LiquidTabBar extends StatelessWidget {
     this.isScrollable = false,
   });
 
-  final List<GlassTab> tabs;
+  final List<LiquidTab> tabs;
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
   final LiquidThemeExtension? themeOverride;
@@ -24,9 +34,15 @@ class LiquidTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = themeOverride ?? LiquidThemeExtension.resolve(context);
+    final glassTabs = tabs
+        .map((tab) => GlassTab(
+              icon: tab.icon,
+              label: tab.label,
+            ))
+        .toList(growable: false);
 
     return GlassTabBar(
-      tabs: tabs,
+      tabs: glassTabs,
       selectedIndex: selectedIndex,
       onTabSelected: onTabSelected,
       height: height,
