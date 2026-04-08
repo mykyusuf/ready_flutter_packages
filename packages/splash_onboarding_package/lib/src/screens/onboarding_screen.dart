@@ -11,6 +11,7 @@ class OnboardingScreen extends StatefulWidget {
     super.key,
     this.background,
     this.pageColors,
+    this.buttonTextColor = Colors.white,
     this.onSkip,
     this.doneLabel = 'Get Started',
     this.nextLabel = 'Next',
@@ -21,6 +22,7 @@ class OnboardingScreen extends StatefulWidget {
   final VoidCallback onDone;
   final Widget? background;
   final List<Color>? pageColors;
+  final Color buttonTextColor;
   final VoidCallback? onSkip;
   final String doneLabel;
   final String nextLabel;
@@ -110,10 +112,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final buttonShape = const LiquidRoundedSuperellipse(borderRadius: 32);
     final buttonSettings = LiquidGlassSettings(
       visibility: 1,
-      glassColor: scheme.surface.withValues(alpha: 0.35),
-      blur: 8,
-      thickness: 26,
-      lightIntensity: 0.7,
+      glassColor: scheme.surface.withValues(alpha: 0.52),
+      blur: 6,
+      thickness: 34,
+      lightIntensity: 1.05,
+      ambientStrength: 0.18,
+      refractiveIndex: 1.2,
+      saturation: 1.22,
     );
 
     final defaultBackground = AnimatedContainer(
@@ -205,7 +210,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             shape: buttonShape,
                             settings: buttonSettings,
                             style: GlassButtonStyle.filled,
-                            child: Text(widget.skipLabel),
+                          glowColor: scheme.primary.withValues(alpha: 0.45),
+                          glowRadius: 1.25,
+                          child: Text(
+                            widget.skipLabel,
+                            style: TextStyle(
+                              color: widget.buttonTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -215,7 +228,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             shape: buttonShape,
                             settings: buttonSettings,
                             style: GlassButtonStyle.filled,
-                            child: Text(_isLastPage ? widget.doneLabel : widget.nextLabel),
+                          glowColor: scheme.primary.withValues(alpha: 0.45),
+                          glowRadius: 1.25,
+                          child: Text(
+                            _isLastPage ? widget.doneLabel : widget.nextLabel,
+                            style: TextStyle(
+                              color: widget.buttonTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           ),
                         ),
                       ],
