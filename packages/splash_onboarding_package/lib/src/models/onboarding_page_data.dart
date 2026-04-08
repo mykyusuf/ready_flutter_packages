@@ -5,10 +5,12 @@ class OnboardingPageData {
   const OnboardingPageData({
     required this.title,
     required this.description,
-    required this.icon,
+    this.icon = Icons.auto_awesome_rounded,
+    this.child,
   });
 
   final String title;
   final String description;
   final IconData icon;
+  final Widget? child;
 }

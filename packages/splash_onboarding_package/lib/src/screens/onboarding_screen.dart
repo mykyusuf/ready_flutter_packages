@@ -72,6 +72,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPageChanged: (value) => setState(() => _index = value),
                     itemBuilder: (context, pageIndex) {
                       final page = widget.pages[pageIndex];
+                      if (page.child != null) {
+                        return Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: page.child!,
+                        );
+                      }
                       return Padding(
                         padding: const EdgeInsets.all(24),
                         child: Column(

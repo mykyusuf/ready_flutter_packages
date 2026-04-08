@@ -48,4 +48,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Page 2'), findsOneWidget);
   });
+
+  testWidgets('OnboardingScreen renders custom child content', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: OnboardingScreen(
+          pages: const [
+            OnboardingPageData(
+              title: 'Custom',
+              description: 'Custom content',
+              child: Center(child: Text('Custom Widget')),
+            ),
+          ],
+          onDone: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('Custom Widget'), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome_rounded), findsNothing);
+  });
 }
